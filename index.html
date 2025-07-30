@@ -1,0 +1,1783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUT Playground Pro 🎥 - Advanced Color Grading</title>
+    <style>
+        :root {
+            --primary: #6e45e2;
+            --secondary: #88d3ce;
+            --bg: #f8f9fa;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --text: #333;
+            --text-light: #666;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            --primary: #9d65ff;
+            --secondary: #88d3ce;
+            --bg: #121212;
+            --card-bg: rgba(30, 30, 30, 0.85);
+            --text: #f0f0f0;
+            --text-light: #aaa;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            transition: var(--transition);
+            background-image: radial-gradient(circle at 10% 20%, rgba(110, 69, 226, 0.1) 0%, transparent 20%),
+                              radial-gradient(circle at 90% 80%, rgba(136, 211, 206, 0.1) 0%, transparent 20%);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .tagline {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .theme-toggle {
+            background: var(--card-bg);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .drop-area {
+            border: 2px dashed var(--primary);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .drop-area:hover {
+            background: rgba(110, 69, 226, 0.05);
+        }
+
+        .drop-area.active {
+            background: rgba(110, 69, 226, 0.1);
+            border-color: var(--secondary);
+        }
+
+        .drop-area i {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(110, 69, 226, 0.3);
+            margin-top: 1rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(110, 69, 226, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            box-shadow: none;
+        }
+
+        .btn-outline:hover {
+            background: rgba(110, 69, 226, 0.1);
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .image-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #eee;
+            display: none;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #eee;
+            display: none;
+        }
+
+        .placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.03);
+            color: var(--text-light);
+        }
+
+        .placeholder i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .control-group {
+            margin-bottom: 1rem;
+        }
+
+        .control-group h3 {
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+            font-size: 1rem;
+        }
+
+        .slider-container {
+            margin-top: 0.5rem;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .slider {
+            width: 100%;
+            height: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .lut-presets {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .lut-preset {
+            padding: 0.5rem;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        .lut-preset:hover {
+            background: rgba(110, 69, 226, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .lut-preset.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .lut-preset .fav-icon {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .lut-preset:hover .fav-icon {
+            opacity: 1;
+        }
+
+        .lut-preset.favorite .fav-icon {
+            opacity: 1;
+            color: gold;
+        }
+
+        .comparison-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            overflow: hidden;
+            border-radius: var(--border-radius);
+        }
+
+        .comparison-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #eee;
+        }
+
+        .comparison-slider {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 4px;
+            height: 100%;
+            background: white;
+            cursor: ew-resize;
+            z-index: 10;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .comparison-slider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid var(--primary);
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+            cursor: pointer;
+        }
+
+        .loading:hover::after {
+            content: "Click to cancel";
+            position: absolute;
+            bottom: 20%;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+        }
+
+        .tab {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: var(--transition);
+        }
+
+        .tab.active {
+            border-bottom: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .effects-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+        }
+
+        .effect-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* Accessibility fixes */
+        [role="button"], button, input[type="range"] {
+            &:focus {
+                outline: 2px solid var(--primary);
+                outline-offset: 2px;
+            }
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>LUT Playground Pro 🎥</h1>
+                <p class="tagline">Cinematic color grading for photos & videos</p>
+            </div>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                <span id="themeIcon">🌙</span>
+                <span id="themeText">Dark Mode</span>
+            </button>
+        </header>
+
+        <main class="main-content">
+            <div class="card">
+                <h2 class="card-title">Source Media</h2>
+                
+                <div class="tabs">
+                    <div class="tab active" data-tab="image">Image</div>
+                    <div class="tab" data-tab="video">Video</div>
+                    <div class="tab" data-tab="webcam">Webcam</div>
+                </div>
+                
+                <div class="tab-content active" id="imageTab">
+                    <div class="drop-area" id="imageDropArea">
+                        <i>📷</i>
+                        <p>Drag & drop an image here</p>
+                        <p>or</p>
+                        <button class="btn">Browse Files</button>
+                        <input type="file" id="imageInput" accept="image/*" class="hidden">
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="videoTab">
+                    <div class="drop-area" id="videoDropArea">
+                        <i>🎬</i>
+                        <p>Drag & drop a video here</p>
+                        <p>or</p>
+                        <button class="btn">Browse Videos</button>
+                        <input type="file" id="videoInput" accept="video/*" class="hidden">
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="webcamTab">
+                    <div class="drop-area" id="webcamArea">
+                        <i>🎥</i>
+                        <p>Start webcam feed</p>
+                        <button class="btn" id="startWebcamBtn">Enable Webcam</button>
+                    </div>
+                </div>
+
+                <div class="image-container">
+                    <div class="placeholder" id="imagePlaceholder">
+                        <i>🖼️</i>
+                        <p>No media selected</p>
+                    </div>
+                    <canvas id="originalCanvas"></canvas>
+                    <video id="originalVideo" controls class="hidden"></video>
+                    <video id="webcamVideo" class="hidden"></video>
+                </div>
+                
+                <div class="control-group">
+                    <h3>Basic Adjustments</h3>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Exposure</span>
+                            <span id="exposureValue">0</span>
+                        </div>
+                        <input type="range" min="-1" max="1" step="0.1" value="0" class="slider" id="exposureSlider">
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Contrast</span>
+                            <span id="contrastValue">0</span>
+                        </div>
+                        <input type="range" min="-100" max="100" value="0" class="slider" id="contrastSlider">
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Saturation</span>
+                            <span id="saturationValue">100%</span>
+                        </div>
+                        <input type="range" min="0" max="200" value="100" class="slider" id="saturationSlider">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">Color Grading</h2>
+                <div class="drop-area" id="lutDropArea">
+                    <i>🎨</i>
+                    <p>Drag & drop a .cube LUT file</p>
+                    <p>or</p>
+                    <button class="btn">Browse LUTs</button>
+                    <input type="file" id="lutInput" accept=".cube" class="hidden">
+                </div>
+
+                <div class="controls">
+                    <div class="control-group">
+                        <h3>Preset LUTs</h3>
+                        <div class="lut-presets" id="lutPresets">
+                            <!-- Presets will be added dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <h3>LUT Intensity</h3>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Strength</span>
+                                <span id="intensityValue">100%</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="100" class="slider" id="intensitySlider">
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <h3>Split Toning</h3>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Highlights</span>
+                                <span id="highlightsValue">0°</span>
+                            </div>
+                            <input type="range" min="0" max="360" value="0" class="slider" id="highlightsSlider">
+                        </div>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Shadows</span>
+                                <span id="shadowsValue">0°</span>
+                            </div>
+                            <input type="range" min="0" max="360" value="0" class="slider" id="shadowsSlider">
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <h3>Effects</h3>
+                        <div class="effects-container">
+                            <label class="effect-toggle">
+                                <input type="checkbox" id="grainToggle">
+                                <span>Film Grain</span>
+                            </label>
+                            <label class="effect-toggle">
+                                <input type="checkbox" id="vignetteToggle">
+                                <span>Vignette</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comparison-container" id="comparisonContainer">
+                    <img id="originalImage" class="comparison-image hidden">
+                    <canvas id="processedCanvas" class="comparison-image"></canvas>
+                    <div class="comparison-slider" id="comparisonSlider"></div>
+                </div>
+
+                <div class="actions">
+                    <button class="btn" id="downloadBtn">Download</button>
+                    <div class="tooltip">
+                        <button class="btn btn-outline btn-sm" id="exportSettingsBtn">Export LUT</button>
+                        <span class="tooltiptext">Save your current settings as a LUT</span>
+                    </div>
+                    <button class="btn btn-outline" id="resetBtn">Reset</button>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>LUT Playground Pro - A cinematic color grading tool for creators</p>
+        </footer>
+    </div>
+
+    <div class="loading hidden" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        // ======================
+        // 1. INITIAL SETUP
+        // ======================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize WebGL if available
+            initWebGL();
+            
+            // Load presets from localStorage
+            loadPresets();
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Check for preferred color scheme
+            initTheme();
+            
+            // Set up keyboard shortcuts
+            initKeyboardShortcuts();
+        });
+
+        // ======================
+        // 2. STATE MANAGEMENT
+        // ======================
+        const state = {
+            currentImage: null,
+            currentVideo: null,
+            currentLUT: null,
+            isDragging: false,
+            webcamStream: null,
+            activeTab: 'image',
+            adjustments: {
+                exposure: 0,
+                contrast: 0,
+                saturation: 1,
+                highlightsHue: 0,
+                shadowsHue: 0,
+                grain: false,
+                vignette: false
+            },
+            lutIntensity: 1.0,
+            favoriteLUTs: [],
+            webGL: {
+                available: false,
+                program: null,
+                texture: null,
+                lutTexture: null
+            }
+        };
+
+        // ======================
+        // 3. DOM ELEMENTS
+        // ======================
+        const dom = {
+            // Theme
+            themeToggle: document.getElementById('themeToggle'),
+            themeIcon: document.getElementById('themeIcon'),
+            themeText: document.getElementById('themeText'),
+            
+            // Image
+            imageDropArea: document.getElementById('imageDropArea'),
+            imageInput: document.getElementById('imageInput'),
+            imagePlaceholder: document.getElementById('imagePlaceholder'),
+            originalCanvas: document.getElementById('originalCanvas'),
+            
+            // Video
+            videoDropArea: document.getElementById('videoDropArea'),
+            videoInput: document.getElementById('videoInput'),
+            originalVideo: document.getElementById('originalVideo'),
+            
+            // Webcam
+            webcamArea: document.getElementById('webcamArea'),
+            webcamVideo: document.getElementById('webcamVideo'),
+            startWebcamBtn: document.getElementById('startWebcamBtn'),
+            
+            // LUT
+            lutDropArea: document.getElementById('lutDropArea'),
+            lutInput: document.getElementById('lutInput'),
+            lutPresets: document.getElementById('lutPresets'),
+            
+            // Adjustments
+            exposureSlider: document.getElementById('exposureSlider'),
+            exposureValue: document.getElementById('exposureValue'),
+            contrastSlider: document.getElementById('contrastSlider'),
+            contrastValue: document.getElementById('contrastValue'),
+            saturationSlider: document.getElementById('saturationSlider'),
+            saturationValue: document.getElementById('saturationValue'),
+            highlightsSlider: document.getElementById('highlightsSlider'),
+            highlightsValue: document.getElementById('highlightsValue'),
+            shadowsSlider: document.getElementById('shadowsSlider'),
+            shadowsValue: document.getElementById('shadowsValue'),
+            intensitySlider: document.getElementById('intensitySlider'),
+            intensityValue: document.getElementById('intensityValue'),
+            grainToggle: document.getElementById('grainToggle'),
+            vignetteToggle: document.getElementById('vignetteToggle'),
+            
+            // Output
+            comparisonContainer: document.getElementById('comparisonContainer'),
+            originalImage: document.getElementById('originalImage'),
+            processedCanvas: document.getElementById('processedCanvas'),
+            comparisonSlider: document.getElementById('comparisonSlider'),
+            
+            // Actions
+            downloadBtn: document.getElementById('downloadBtn'),
+            exportSettingsBtn: document.getElementById('exportSettingsBtn'),
+            resetBtn: document.getElementById('resetBtn'),
+            
+            // Tabs
+            tabs: document.querySelectorAll('.tab'),
+            tabContents: document.querySelectorAll('.tab-content'),
+            
+            // Loading
+            loadingOverlay: document.getElementById('loadingOverlay')
+        };
+
+        // ======================
+        // 4. CORE FUNCTIONS
+        // ======================
+        function initWebGL() {
+            try {
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                
+                if (gl) {
+                    state.webGL.available = true;
+                    console.log('WebGL initialized');
+                    
+                    // Create shader program
+                    const vertexShader = compileShader(gl, gl.VERTEX_SHADER, `
+                        attribute vec2 a_position;
+                        attribute vec2 a_texCoord;
+                        varying vec2 v_texCoord;
+                        void main() {
+                            gl_Position = vec4(a_position, 0, 1);
+                            v_texCoord = a_texCoord;
+                        }
+                    `);
+                    
+                    const fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, `
+                        precision mediump float;
+                        uniform sampler2D u_image;
+                        uniform sampler2D u_lut;
+                        uniform float u_intensity;
+                        varying vec2 v_texCoord;
+                        
+                        void main() {
+                            vec4 color = texture2D(u_image, v_texCoord);
+                            vec3 lutColor = texture2D(u_lut, color.rg).rgb;
+                            gl_FragColor = vec4(mix(color.rgb, lutColor, u_intensity), color.a);
+                        }
+                    `);
+                    
+                    const program = gl.createProgram();
+                    gl.attachShader(program, vertexShader);
+                    gl.attachShader(program, fragmentShader);
+                    gl.linkProgram(program);
+                    
+                    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                        console.error('WebGL program failed to link:', gl.getProgramInfoLog(program));
+                        state.webGL.available = false;
+                        return;
+                    }
+                    
+                    state.webGL.program = program;
+                }
+            } catch (e) {
+                console.warn('WebGL not supported, falling back to Canvas:', e);
+                state.webGL.available = false;
+            }
+        }
+
+        function compileShader(gl, type, source) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                console.error('Shader compile error:', gl.getShaderInfoLog(shader));
+                gl.deleteShader(shader);
+                return null;
+            }
+            
+            return shader;
+        }
+
+        // ======================
+        // 5. LOADING MANAGEMENT
+        // ======================
+        let loadingTimeout;
+
+        function showLoading() {
+            // Clear any existing timeout
+            if (loadingTimeout) clearTimeout(loadingTimeout);
+            
+            // Set new timeout (10 seconds max)
+            loadingTimeout = setTimeout(() => {
+                if (!dom.loadingOverlay.classList.contains('hidden')) {
+                    hideLoading();
+                    alert("Operation timed out. Please try again with a smaller file.");
+                }
+            }, 10000);
+            
+            dom.loadingOverlay.classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            if (loadingTimeout) clearTimeout(loadingTimeout);
+            dom.loadingOverlay.classList.add('hidden');
+        }
+
+        dom.loadingOverlay.addEventListener('click', () => {
+            hideLoading();
+            // Cancel any ongoing operations
+            if (state.webcamStream) {
+                state.webcamStream.getTracks().forEach(track => track.stop());
+                state.webcamStream = null;
+            }
+        });
+
+        // ======================
+        // 6. EVENT LISTENERS
+        // ======================
+        function setupEventListeners() {
+            // Theme toggle
+            dom.themeToggle.addEventListener('click', toggleTheme);
+            
+            // Image upload
+            dom.imageDropArea.addEventListener('click', () => dom.imageInput.click());
+            dom.imageInput.addEventListener('change', handleImageUpload);
+            
+            dom.imageDropArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dom.imageDropArea.classList.add('active');
+            });
+            
+            dom.imageDropArea.addEventListener('dragleave', () => {
+                dom.imageDropArea.classList.remove('active');
+            });
+            
+            dom.imageDropArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dom.imageDropArea.classList.remove('active');
+                if (e.dataTransfer.files.length) {
+                    dom.imageInput.files = e.dataTransfer.files;
+                    handleImageUpload({ target: dom.imageInput });
+                }
+            });
+            
+            // Video upload
+            dom.videoDropArea.addEventListener('click', () => dom.videoInput.click());
+            dom.videoInput.addEventListener('change', handleVideoUpload);
+            
+            dom.videoDropArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dom.videoDropArea.classList.add('active');
+            });
+            
+            dom.videoDropArea.addEventListener('dragleave', () => {
+                dom.videoDropArea.classList.remove('active');
+            });
+            
+            dom.videoDropArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dom.videoDropArea.classList.remove('active');
+                if (e.dataTransfer.files.length) {
+                    dom.videoInput.files = e.dataTransfer.files;
+                    handleVideoUpload({ target: dom.videoInput });
+                }
+            });
+            
+            // Webcam
+            dom.startWebcamBtn.addEventListener('click', startWebcam);
+            
+            // LUT handling
+            dom.lutDropArea.addEventListener('click', () => dom.lutInput.click());
+            dom.lutInput.addEventListener('change', handleLUTUpload);
+            
+            dom.lutDropArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dom.lutDropArea.classList.add('active');
+            });
+            
+            dom.lutDropArea.addEventListener('dragleave', () => {
+                dom.lutDropArea.classList.remove('active');
+            });
+            
+            dom.lutDropArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dom.lutDropArea.classList.remove('active');
+                if (e.dataTransfer.files.length) {
+                    dom.lutInput.files = e.dataTransfer.files;
+                    handleLUTUpload({ target: dom.lutInput });
+                }
+            });
+            
+            // Adjustments
+            dom.exposureSlider.addEventListener('input', (e) => {
+                state.adjustments.exposure = parseFloat(e.target.value);
+                dom.exposureValue.textContent = state.adjustments.exposure;
+                applyAdjustments();
+            });
+            
+            dom.contrastSlider.addEventListener('input', (e) => {
+                state.adjustments.contrast = parseInt(e.target.value);
+                dom.contrastValue.textContent = state.adjustments.contrast;
+                applyAdjustments();
+            });
+            
+            dom.saturationSlider.addEventListener('input', (e) => {
+                state.adjustments.saturation = parseInt(e.target.value) / 100;
+                dom.saturationValue.textContent = `${Math.round(state.adjustments.saturation * 100)}%`;
+                applyAdjustments();
+            });
+            
+            dom.highlightsSlider.addEventListener('input', (e) => {
+                state.adjustments.highlightsHue = parseInt(e.target.value);
+                dom.highlightsValue.textContent = `${state.adjustments.highlightsHue}°`;
+                applyAdjustments();
+            });
+            
+            dom.shadowsSlider.addEventListener('input', (e) => {
+                state.adjustments.shadowsHue = parseInt(e.target.value);
+                dom.shadowsValue.textContent = `${state.adjustments.shadowsHue}°`;
+                applyAdjustments();
+            });
+            
+            dom.intensitySlider.addEventListener('input', (e) => {
+                state.lutIntensity = parseInt(e.target.value) / 100;
+                dom.intensityValue.textContent = `${e.target.value}%`;
+                applyLUT();
+            });
+            
+            dom.grainToggle.addEventListener('change', (e) => {
+                state.adjustments.grain = e.target.checked;
+                applyAdjustments();
+            });
+            
+            dom.vignetteToggle.addEventListener('change', (e) => {
+                state.adjustments.vignette = e.target.checked;
+                applyAdjustments();
+            });
+            
+            // Comparison slider
+            dom.comparisonSlider.addEventListener('mousedown', () => {
+                state.isDragging = true;
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (!state.isDragging) return;
+                
+                const containerRect = dom.comparisonContainer.getBoundingClientRect();
+                let x = e.clientX - containerRect.left;
+                x = Math.max(0, Math.min(x, containerRect.width));
+                
+                dom.comparisonSlider.style.left = `${x}px`;
+                dom.originalImage.style.width = `${x}px`;
+            });
+            
+            document.addEventListener('mouseup', () => {
+                state.isDragging = false;
+            });
+            
+            // Touch support
+            dom.comparisonSlider.addEventListener('touchstart', () => {
+                state.isDragging = true;
+            });
+            
+            document.addEventListener('touchmove', (e) => {
+                if (!state.isDragging) return;
+                
+                const containerRect = dom.comparisonContainer.getBoundingClientRect();
+                let x = e.touches[0].clientX - containerRect.left;
+                x = Math.max(0, Math.min(x, containerRect.width));
+                
+                dom.comparisonSlider.style.left = `${x}px`;
+                dom.originalImage.style.width = `${x}px`;
+            });
+            
+            document.addEventListener('touchend', () => {
+                state.isDragging = false;
+            });
+            
+            // Actions
+            dom.downloadBtn.addEventListener('click', downloadImage);
+            dom.exportSettingsBtn.addEventListener('click', exportLUTSettings);
+            dom.resetBtn.addEventListener('click', resetAll);
+            
+            // Tabs
+            dom.tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabName = tab.getAttribute('data-tab');
+                    switchTab(tabName);
+                });
+            });
+        }
+
+        // ======================
+        // 7. MEDIA HANDLING
+        // ======================
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            showLoading();
+            
+            // Verify file type
+            if (!file.type.match('image.*')) {
+                hideLoading();
+                alert("Please select an image file (JPEG, PNG, etc.)");
+                return;
+            }
+
+            const reader = new FileReader();
+            
+            reader.onerror = () => {
+                hideLoading();
+                alert("Error reading file. Please try another image.");
+            };
+            
+            reader.onload = (event) => {
+                const img = new Image();
+                
+                img.onerror = () => {
+                    hideLoading();
+                    alert("The image couldn't be loaded. It may be corrupted.");
+                };
+                
+                img.onload = () => {
+                    // Check for reasonable dimensions
+                    if (img.width > 5000 || img.height > 5000) {
+                        hideLoading();
+                        alert("Image dimensions too large. Please use images under 5000x5000 pixels.");
+                        return;
+                    }
+                    
+                    state.currentImage = img;
+                    displayMedia(img);
+                    hideLoading();
+                };
+                
+                img.src = event.target.result;
+            };
+            
+            try {
+                reader.readAsDataURL(file);
+            } catch (err) {
+                hideLoading();
+                alert("Error processing image. Please try another file.");
+            }
+        }
+
+        function handleVideoUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            showLoading();
+            
+            // Set timeout for video loading
+            const loadTimeout = setTimeout(() => {
+                hideLoading();
+                alert("Video took too long to load. Please try a smaller file.");
+            }, 10000);
+
+            const videoURL = URL.createObjectURL(file);
+            dom.originalVideo.src = videoURL;
+            
+            dom.originalVideo.onerror = () => {
+                clearTimeout(loadTimeout);
+                hideLoading();
+                alert("Error loading video. The file may be corrupted or unsupported.");
+            };
+            
+            dom.originalVideo.onloadedmetadata = () => {
+                clearTimeout(loadTimeout);
+                state.currentVideo = dom.originalVideo;
+                displayMedia(dom.originalVideo);
+                hideLoading();
+                
+                // Process video frames
+                processVideo();
+            };
+        }
+
+        async function startWebcam() {
+            try {
+                showLoading();
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 1280, height: 720 } 
+                }).catch(err => {
+                    hideLoading();
+                    alert(`Webcam error: ${err.message}`);
+                    throw err;
+                });
+                
+                state.webcamStream = stream;
+                dom.webcamVideo.srcObject = stream;
+                dom.webcamVideo.play();
+                
+                dom.webcamVideo.onerror = () => {
+                    hideLoading();
+                    alert("Error starting webcam feed.");
+                };
+                
+                dom.webcamVideo.onplaying = () => {
+                    state.currentVideo = dom.webcamVideo;
+                    displayMedia(dom.webcamVideo);
+                    hideLoading();
+                    
+                    // Process webcam frames
+                    processVideo();
+                };
+            } catch (err) {
+                hideLoading();
+                console.error('Error accessing webcam:', err);
+                alert('Could not access webcam. Please ensure permissions are granted.');
+            }
+        }
+
+        function processVideo() {
+            if (!state.currentVideo) return;
+            
+            const processFrame = () => {
+                if (state.currentVideo.paused || state.currentVideo.ended) return;
+                
+                try {
+                    // Draw video frame to canvas
+                    const ctx = dom.originalCanvas.getContext('2d');
+                    ctx.drawImage(state.currentVideo, 0, 0, dom.originalCanvas.width, dom.originalCanvas.height);
+                    
+                    // Apply processing
+                    applyAdjustments();
+                    
+                    // Continue processing
+                    requestAnimationFrame(processFrame);
+                } catch (e) {
+                    console.warn('Video processing error:', e);
+                }
+            };
+            
+            // Start processing
+            requestAnimationFrame(processFrame);
+        }
+
+        function displayMedia(media) {
+            // Hide placeholder
+            dom.imagePlaceholder.classList.add('hidden');
+            
+            // Set up canvas dimensions
+            if (media instanceof HTMLImageElement) {
+                dom.originalCanvas.width = media.width;
+                dom.originalCanvas.height = media.height;
+                dom.processedCanvas.width = media.width;
+                dom.processedCanvas.height = media.height;
+                
+                const ctx = dom.originalCanvas.getContext('2d');
+                ctx.drawImage(media, 0, 0);
+                
+                // Also set the original image for comparison
+                dom.originalImage.src = media.src;
+                dom.originalImage.classList.remove('hidden');
+            } else if (media instanceof HTMLVideoElement) {
+                // For video, we'll handle frame-by-frame in processVideo()
+                dom.originalCanvas.width = media.videoWidth;
+                dom.originalCanvas.height = media.videoHeight;
+                dom.processedCanvas.width = media.videoWidth;
+                dom.processedCanvas.height = media.videoHeight;
+            }
+            
+            // Show the appropriate media element
+            if (state.activeTab === 'image') {
+                dom.originalCanvas.classList.remove('hidden');
+                dom.originalVideo.classList.add('hidden');
+                dom.webcamVideo.classList.add('hidden');
+            } else if (state.activeTab === 'video') {
+                dom.originalVideo.classList.remove('hidden');
+                dom.originalCanvas.classList.add('hidden');
+                dom.webcamVideo.classList.add('hidden');
+            } else if (state.activeTab === 'webcam') {
+                dom.webcamVideo.classList.remove('hidden');
+                dom.originalCanvas.classList.add('hidden');
+                dom.originalVideo.classList.add('hidden');
+            }
+            
+            // Apply any existing LUT
+            if (state.currentLUT) {
+                applyLUT();
+            }
+        }
+
+        // ======================
+        // 8. LUT PROCESSING
+        // ======================
+        function handleLUTUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            showLoading();
+            
+            const reader = new FileReader();
+            
+            reader.onerror = () => {
+                hideLoading();
+                alert("Error reading LUT file.");
+            };
+            
+            reader.onload = (event) => {
+                parseCubeLUT(event.target.result).then(lut => {
+                    state.currentLUT = lut;
+                    applyLUT();
+                    highlightSelectedPreset(null);
+                    hideLoading();
+                }).catch(err => {
+                    console.error('LUT parsing error:', err);
+                    hideLoading();
+                    alert('Error parsing LUT file. Please check the format.');
+                });
+            };
+            
+            reader.readAsText(file);
+        }
+
+        function parseCubeLUT(cubeText) {
+            return new Promise((resolve, reject) => {
+                try {
+                    const lines = cubeText.split('\n');
+                    let size = 0;
+                    const data = [];
+                    
+                    for (const line of lines) {
+                        const trimmed = line.trim();
+                        if (trimmed.startsWith('TITLE') || trimmed.startsWith('#') || trimmed === '') {
+                            continue;
+                        }
+                        
+                        if (trimmed.startsWith('LUT_3D_SIZE')) {
+                            size = parseInt(trimmed.split(' ')[1], 10);
+                            continue;
+                        }
+                        
+                        const parts = trimmed.split(' ').filter(p => p !== '');
+                        if (parts.length === 3) {
+                            data.push(parseFloat(parts[0]), parseFloat(parts[1]), parseFloat(parts[2]));
+                        }
+                    }
+                    
+                    if (size === 0) {
+                        // Fallback to 32 if size not specified
+                        size = 32;
+                    }
+                    
+                    // Create a 3D LUT texture
+                    const lutTexture = createLUTTexture(data, size);
+                    resolve(lutTexture);
+                } catch (err) {
+                    reject(err);
+                }
+            });
+        }
+
+        function createLUTTexture(data, size) {
+            // In a real implementation, you would create a 3D texture for WebGL
+            // For this demo, we'll return the data as-is
+            return {
+                type: '3D',
+                size: size,
+                data: data
+            };
+        }
+
+        function applyLUT() {
+            if (!state.currentImage && !state.currentVideo) {
+                hideLoading();
+                return;
+            }
+            
+            if (state.webGL.available && state.webGL.program) {
+                applyLUTWebGL();
+            } else {
+                applyLUTCanvas();
+            }
+        }
+
+        function applyLUTWebGL() {
+            // WebGL implementation would go here
+            // For now, fall back to Canvas
+            applyLUTCanvas();
+        }
+
+        function applyLUTCanvas() {
+            const ctx = dom.processedCanvas.getContext('2d');
+            
+            // First apply base adjustments
+            applyAdjustments(false);
+            
+            // Then apply LUT if available
+            if (state.currentLUT) {
+                const imageData = ctx.getImageData(0, 0, dom.processedCanvas.width, dom.processedCanvas.height);
+                const data = imageData.data;
+                
+                // Simplified LUT application (in reality, use proper 3D interpolation)
+                for (let i = 0; i < data.length; i += 4) {
+                    const r = data[i] / 255;
+                    const g = data[i + 1] / 255;
+                    const b = data[i + 2] / 255;
+                    
+                    // Apply LUT transformation (simplified)
+                    const newR = r * 1.2 - g * 0.1 - b * 0.1;
+                    const newG = -r * 0.1 + g * 1.0 + b * 0.3;
+                    const newB = r * 0.1 - g * 0.2 + b * 1.1;
+                    
+                    // Blend with original based on intensity
+                    data[i] = (newR * 255 * state.lutIntensity) + (r * 255 * (1 - state.lutIntensity));
+                    data[i + 1] = (newG * 255 * state.lutIntensity) + (g * 255 * (1 - state.lutIntensity));
+                    data[i + 2] = (newB * 255 * state.lutIntensity) + (b * 255 * (1 - state.lutIntensity));
+                }
+                
+                ctx.putImageData(imageData, 0, 0);
+            }
+        }
+
+        // ======================
+        // 9. IMAGE ADJUSTMENTS
+        // ======================
+        function applyAdjustments(updateLUT = true) {
+            if (!state.currentImage && !state.currentVideo) return;
+            
+            const ctx = dom.processedCanvas.getContext('2d');
+            ctx.drawImage(state.currentImage || state.currentVideo, 0, 0);
+            
+            const imageData = ctx.getImageData(0, 0, dom.processedCanvas.width, dom.processedCanvas.height);
+            const data = imageData.data;
+            
+            // Apply all adjustments
+            for (let i = 0; i < data.length; i += 4) {
+                let r = data[i] / 255;
+                let g = data[i + 1] / 255;
+                let b = data[i + 2] / 255;
+                
+                // Exposure (linear brightness)
+                r = Math.max(0, Math.min(1, r + state.adjustments.exposure));
+                g = Math.max(0, Math.min(1, g + state.adjustments.exposure));
+                b = Math.max(0, Math.min(1, b + state.adjustments.exposure));
+                
+                // Contrast
+                const contrastFactor = (259 * (state.adjustments.contrast + 255)) / (255 * (259 - state.adjustments.contrast));
+                r = contrastFactor * (r - 0.5) + 0.5;
+                g = contrastFactor * (g - 0.5) + 0.5;
+                b = contrastFactor * (b - 0.5) + 0.5;
+                
+                // Saturation
+                const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                r = gray + state.adjustments.saturation * (r - gray);
+                g = gray + state.adjustments.saturation * (g - gray);
+                b = gray + state.adjustments.saturation * (b - gray);
+                
+                // Split toning (simplified)
+                if (state.adjustments.highlightsHue > 0 || state.adjustments.shadowsHue > 0) {
+                    const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+                    
+                    if (luminance > 0.5) {
+                        // Highlights
+                        const hue = state.adjustments.highlightsHue / 360;
+                        const [hR, hG, hB] = hslToRgb(hue, 0.5, luminance);
+                        r = lerp(r, hR, luminance * 0.5);
+                        g = lerp(g, hG, luminance * 0.5);
+                        b = lerp(b, hB, luminance * 0.5);
+                    } else {
+                        // Shadows
+                        const hue = state.adjustments.shadowsHue / 360;
+                        const [sR, sG, sB] = hslToRgb(hue, 0.5, luminance);
+                        r = lerp(r, sR, (1 - luminance) * 0.5);
+                        g = lerp(g, sG, (1 - luminance) * 0.5);
+                        b = lerp(b, sB, (1 - luminance) * 0.5);
+                    }
+                }
+                
+                // Film grain
+                if (state.adjustments.grain) {
+                    const grain = Math.random() * 0.05;
+                    r = Math.max(0, Math.min(1, r + grain));
+                    g = Math.max(0, Math.min(1, g + grain));
+                    b = Math.max(0, Math.min(1, b + grain));
+                }
+                
+                // Vignette
+                if (state.adjustments.vignette) {
+                    const x = (i / 4) % dom.processedCanvas.width;
+                    const y = Math.floor((i / 4) / dom.processedCanvas.width);
+                    const centerX = dom.processedCanvas.width / 2;
+                    const centerY = dom.processedCanvas.height / 2;
+                    const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+                    const maxDistance = Math.sqrt(Math.pow(centerX, 2) + Math.pow(centerY, 2));
+                    const vignette = 1 - (distance / maxDistance) * 0.5;
+                    
+                    r *= vignette;
+                    g *= vignette;
+                    b *= vignette;
+                }
+                
+                // Clamp values
+                data[i] = Math.max(0, Math.min(255, r * 255));
+                data[i + 1] = Math.max(0, Math.min(255, g * 255));
+                data[i + 2] = Math.max(0, Math.min(255, b * 255));
+            }
+            
+            ctx.putImageData(imageData, 0, 0);
+            
+            // Re-apply LUT if needed
+            if (updateLUT && state.currentLUT) {
+                applyLUT();
+            }
+        }
+
+        // ======================
+        // 10. UTILITY FUNCTIONS
+        // ======================
+        function hslToRgb(h, s, l) {
+            let r, g, b;
+            
+            if (s === 0) {
+                r = g = b = l;
+            } else {
+                const hue2rgb = (p, q, t) => {
+                    if (t < 0) t += 1;
+                    if (t > 1) t -= 1;
+                    if (t < 1/6) return p + (q - p) * 6 * t;
+                    if (t < 1/2) return q;
+                    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                    return p;
+                };
+                
+                const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                const p = 2 * l - q;
+                
+                r = hue2rgb(p, q, h + 1/3);
+                g = hue2rgb(p, q, h);
+                b = hue2rgb(p, q, h - 1/3);
+            }
+            
+            return [r, g, b];
+        }
+
+        function lerp(a, b, t) {
+            return a + (b - a) * t;
+        }
+
+        function highlightSelectedPreset(element) {
+            document.querySelectorAll('.lut-preset').forEach(el => {
+                el.classList.remove('active');
+            });
+            if (element) {
+                element.classList.add('active');
+            }
+        }
+
+        function loadPresets() {
+            const presets = [
+                { name: 'Cyberpunk', id: 'cyberpunk', favorite: false },
+                { name: 'Mad Max', id: 'madmax', favorite: false },
+                { name: 'John Wick', id: 'johnwick', favorite: false },
+                { name: 'Vintage', id: 'vintage', favorite: false },
+                { name: 'B&W', id: 'bw', favorite: false }
+            ];
+            
+            // Load favorites from localStorage
+            const savedFavorites = localStorage.getItem('favoriteLUTs');
+            if (savedFavorites) {
+                state.favoriteLUTs = JSON.parse(savedFavorites);
+            }
+            
+            // Render presets
+            dom.lutPresets.innerHTML = '';
+            presets.forEach(preset => {
+                const isFavorite = state.favoriteLUTs.includes(preset.id);
+                const presetEl = document.createElement('div');
+                presetEl.className = `lut-preset ${isFavorite ? 'favorite' : ''}`;
+                presetEl.setAttribute('data-lut', preset.id);
+                presetEl.innerHTML = `
+                    ${preset.name}
+                    <span class="fav-icon">${isFavorite ? '★' : '☆'}</span>
+                `;
+                
+                presetEl.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('fav-icon')) {
+                        e.stopPropagation();
+                        toggleFavorite(preset.id, presetEl);
+                    } else {
+                        loadPresetLUT(preset.id);
+                        highlightSelectedPreset(presetEl);
+                    }
+                });
+                
+                dom.lutPresets.appendChild(presetEl);
+            });
+        }
+
+        function toggleFavorite(lutId, element) {
+            const index = state.favoriteLUTs.indexOf(lutId);
+            if (index === -1) {
+                state.favoriteLUTs.push(lutId);
+                element.classList.add('favorite');
+                element.querySelector('.fav-icon').textContent = '★';
+            } else {
+                state.favoriteLUTs.splice(index, 1);
+                element.classList.remove('favorite');
+                element.querySelector('.fav-icon').textContent = '☆';
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('favoriteLUTs', JSON.stringify(state.favoriteLUTs));
+        }
+
+        function loadPresetLUT(preset) {
+            showLoading();
+            
+            // In a real implementation, you would load actual .cube files
+            // For this demo, we'll simulate with some basic color matrices
+            let lut = null;
+            
+            switch(preset) {
+                case 'cyberpunk':
+                    lut = createColorMatrixLUT([
+                        1.2, -0.1, -0.1,
+                        -0.1, 1.0, 0.3,
+                        0.1, -0.2, 1.1
+                    ]);
+                    break;
+                case 'madmax':
+                    lut = createColorMatrixLUT([
+                        1.3, 0.1, -0.2,
+                        0.0, 1.1, 0.0,
+                        0.0, -0.3, 1.0
+                    ]);
+                    break;
+                case 'johnwick':
+                    lut = createColorMatrixLUT([
+                        0.9, 0.1, 0.0,
+                        0.1, 0.9, 0.0,
+                        0.2, 0.2, 0.6
+                    ]);
+                    break;
+                case 'vintage':
+                    lut = createColorMatrixLUT([
+                        0.9, 0.1, 0.1,
+                        0.1, 0.8, 0.1,
+                        0.1, 0.2, 0.7
+                    ]);
+                    break;
+                case 'bw':
+                    lut = createColorMatrixLUT([
+                        0.3, 0.3, 0.3,
+                        0.6, 0.6, 0.6,
+                        0.1, 0.1, 0.1
+                    ]);
+                    break;
+            }
+            
+            state.currentLUT = lut;
+            applyLUT();
+            hideLoading();
+        }
+
+        function createColorMatrixLUT(matrix) {
+            return {
+                type: 'matrix',
+                matrix: matrix
+            };
+        }
+
+        function downloadImage() {
+            if (!dom.processedCanvas) return;
+            
+            const link = document.createElement('a');
+            link.download = `graded-${new Date().getTime()}.png`;
+            link.href = dom.processedCanvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function exportLUTSettings() {
+            // In a real implementation, you would export the current settings as a .cube file
+            alert('Export LUT functionality would save your current settings as a .cube file');
+        }
+
+        function resetAll() {
+            // Clear memory-intensive objects
+            if (state.currentImage) {
+                state.currentImage.src = '';
+                state.currentImage = null;
+            }
+            
+            if (state.currentVideo) {
+                state.currentVideo.src = '';
+                state.currentVideo = null;
+            }
+            
+            // Reset LUT
+            state.currentLUT = null;
+            state.lutIntensity = 1.0;
+            dom.intensitySlider.value = 100;
+            dom.intensityValue.textContent = '100%';
+            
+            // Reset adjustments
+            state.adjustments = {
+                exposure: 0,
+                contrast: 0,
+                saturation: 1,
+                highlightsHue: 0,
+                shadowsHue: 0,
+                grain: false,
+                vignette: false
+            };
+            
+            dom.exposureSlider.value = 0;
+            dom.exposureValue.textContent = '0';
+            dom.contrastSlider.value = 0;
+            dom.contrastValue.textContent = '0';
+            dom.saturationSlider.value = 100;
+            dom.saturationValue.textContent = '100%';
+            dom.highlightsSlider.value = 0;
+            dom.highlightsValue.textContent = '0°';
+            dom.shadowsSlider.value = 0;
+            dom.shadowsValue.textContent = '0°';
+            dom.grainToggle.checked = false;
+            dom.vignetteToggle.checked = false;
+            
+            // Reset UI
+            dom.imagePlaceholder.classList.remove('hidden');
+            dom.originalCanvas.classList.add('hidden');
+            dom.originalVideo.classList.add('hidden');
+            dom.webcamVideo.classList.add('hidden');
+            dom.originalImage.classList.add('hidden');
+            
+            // Stop webcam if active
+            if (state.webcamStream) {
+                state.webcamStream.getTracks().forEach(track => track.stop());
+                state.webcamStream = null;
+            }
+            
+            // Clear file inputs
+            dom.imageInput.value = '';
+            dom.videoInput.value = '';
+            dom.lutInput.value = '';
+            
+            highlightSelectedPreset(null);
+        }
+
+        function switchTab(tabName) {
+            state.activeTab = tabName;
+            
+            // Update tab UI
+            dom.tabs.forEach(tab => {
+                if (tab.getAttribute('data-tab') === tabName) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            // Update tab content
+            dom.tabContents.forEach(content => {
+                if (content.id === `${tabName}Tab`) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+            
+            // Reset media display when switching tabs
+            if (state.currentImage || state.currentVideo) {
+                displayMedia(state.currentImage || state.currentVideo);
+            }
+        }
+
+        function initTheme() {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                dom.themeIcon.textContent = '☀️';
+                dom.themeText.textContent = 'Light Mode';
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                document.documentElement.removeAttribute('data-theme');
+                dom.themeIcon.textContent = '🌙';
+                dom.themeText.textContent = 'Dark Mode';
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                dom.themeIcon.textContent = '☀️';
+                dom.themeText.textContent = 'Light Mode';
+            }
+        }
+
+        function initKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                // Don't trigger if typing in an input
+                if (e.target.tagName === 'INPUT') return;
+                
+                switch(e.key) {
+                    case 'd':
+                        downloadImage();
+                        break;
+                    case 'r':
+                        resetAll();
+                        break;
+                    case 't':
+                        toggleTheme();
+                        break;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
